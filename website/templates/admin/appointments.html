@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}Appointments{% endblock %}
+
+{% block navbar %}
+  {% include 'admin/navbar.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+    <div>
+      <h2 class="mb-1">Client Appointments</h2>
+      <p class="text-muted mb-0">Review, filter, and manage appointment requests.</p>
+    </div>
+  </div>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Filters (GET) -->
+  <form class="card border-0 shadow-sm mb-3" method="GET">
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-3">
+          <label class="form-label small text-muted">Type</label>
+          <select class="form-select" name="type">
+            <option value="">All</option>
+            <option value="online"  {% if request.args.get('type') == 'online' %}selected{% endif %}>Online</option>
+            <option value="physical" {% if request.args.get('type') == 'physical' %}selected{% endif %}>Physical</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-3">
+          <label class="form-label small text-muted">Status</label>
+          <select class="form-select" name="status">
+            <option value="">All</option>
+            <option value="pending"   {% if request.args.get('status') == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="confirmed" {% if request.args.get('status') == 'confirmed' %}selected{% endif %}>Confirmed</option>
+            <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Completed</option>
+            <option value="cancelled" {% if request.args.get('status') == 'cancelled' %}selected{% endif %}>Cancelled</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label class="form-label small text-muted">Search</label>
+          <input
+            class="form-control"
+            name="q"
+            value="{{ request.args.get('q','') }}"
+            placeholder="Name, email..."
+          >
+        </div>
+
+        <div class="col-12 col-md-2 d-grid">
+          <button class="btn btn-primary">Apply</button>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  {% if appointments %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Appointments</h6>
+        <span class="text-muted small">Showing {{ appointments|length }} result(s)</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Client</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for appointment in appointments %}
+              {% set appt_type = appointment.appointment_type if appointment.appointment_type is defined else appointment.type if appointment.type is defined else '' %}
+              {% set status = appointment.status|lower if appointment.status else '' %}
+
+              <tr>
+                <td>
+                  <div class="fw-semibold">{{ appointment.fullname }}</div>
+                  <div class="text-muted small">{{ appointment.email }}</div>
+                </td>
+
+                <td>
+                  <div class="fw-semibold">{{ appointment.date.strftime("%Y-%m-%d") }}</div>
+                  <div class="text-muted small">{{ appointment.time.strftime("%H:%M") }}</div>
+                </td>
+
+                <td>
+                  {% if appt_type == 'online' %}
+                    <span class="badge text-bg-info">Online</span>
+                  {% elif appt_type == 'physical' %}
+                    <span class="badge text-bg-secondary">Physical</span>
+                  {% else %}
+                    <span class="badge text-bg-light">N/A</span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  {% if status == 'pending' %}
+                    <span class="badge text-bg-warning">Pending</span>
+                  {% elif status == 'confirmed' %}
+                    <span class="badge text-bg-success">Confirmed</span>
+                  {% elif status == 'cancelled' %}
+                    <span class="badge text-bg-danger">Cancelled</span>
+                  {% elif status == 'completed' %}
+                    <span class="badge text-bg-dark">Completed</span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">{{ appointment.status }}</span>
+                  {% endif %}
+                </td>
+
+                <td class="text-end">
+                  <div class="btn-group">
+
+                    <!-- CONFIRM -->
+                    {% if status != 'confirmed' and status != 'completed' and status != 'cancelled' %}
+                      <form method="POST" action="{{ url_for('views.confirm_appointment', appointment_id=appointment.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-success">Confirm</button>
+                      </form>
+                    {% else %}
+                      <button class="btn btn-sm btn-outline-success" disabled>Confirm</button>
+                    {% endif %}
+
+                    <!-- CANCEL -->
+                    {% if status != 'cancelled' and status != 'completed' %}
+                      <form method="POST" action="{{ url_for('views.cancel_appointment', appointment_id=appointment.id) }}" class="d-inline"
+                            onsubmit="return confirm('Cancel this appointment and notify the client?')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                      </form>
+                    {% else %}
+                      <button class="btn btn-sm btn-outline-danger" disabled>Cancel</button>
+                    {% endif %}
+
+                    <!-- COMPLETE — triggers modal -->
+                    {% if status == 'confirmed' %}
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-dark"
+                        data-bs-toggle="modal"
+                        data-bs-target="#completeModal"
+                        data-appt-id="{{ appointment.id }}"
+                        data-appt-name="{{ appointment.fullname }}"
+                      >Complete</button>
+                    {% else %}
+                      <button class="btn btn-sm btn-outline-dark" disabled>Complete</button>
+                    {% endif %}
+
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  {% else %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-body text-center py-5">
+        <h5 class="mb-2">No appointments yet</h5>
+        <p class="text-muted mb-0">When clients book, their requests will appear here.</p>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- ===== Complete Appointment Modal ===== -->
+<div class="modal fade" id="completeModal" tabindex="-1" aria-labelledby="completeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title" id="completeModalLabel">Complete Appointment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="POST" id="completeForm" action="">
+        <div class="modal-body">
+          <p class="text-muted small mb-3">
+            Write a brief note about <strong id="modalClientName"></strong>'s session — diagnosis, treatment, or follow-up advice.
+            This will be saved to the appointment record.
+          </p>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Session Notes <span class="text-danger">*</span></label>
+            <textarea
+              class="form-control"
+              name="notes"
+              rows="5"
+              placeholder="e.g. Patient presented with mild hypertension. Prescribed medication X. Follow-up in 2 weeks."
+              required
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-dark">Mark as Completed</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Inject the correct appointment ID into the modal form action
+  const completeModal = document.getElementById('completeModal');
+  completeModal.addEventListener('show.bs.modal', function (event) {
+    const btn = event.relatedTarget;
+    const apptId = btn.getAttribute('data-appt-id');
+    const apptName = btn.getAttribute('data-appt-name');
+
+    document.getElementById('completeForm').action = `/admin/appointments/${apptId}/complete`;
+    document.getElementById('modalClientName').textContent = apptName;
+  });
+</script>
+
+{% endblock %}

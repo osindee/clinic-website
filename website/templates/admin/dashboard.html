@@ -1,0 +1,134 @@
+
+
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block navbar %}
+  {% include "admin/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+    <div>
+      <h2 class="mb-1">Admin Dashboard</h2>
+      <p class="text-muted mb-0">Manage clinic appointments and availability at a glance.</p>
+    </div>
+
+    <div class="mt-3 mt-md-0 d-flex gap-2">
+      <a href="{{ url_for('views.admin_appointments') }}" class="btn btn-primary">
+        View Appointments
+      </a>
+      <a href="{{ url_for('views.admin_availability') }}" class="btn btn-outline-dark">
+        Manage Availability
+      </a>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="row g-3 mb-3">
+
+    <div class="col-12 col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="text-muted small">Total Appointments</div>
+              <div class="display-6 fw-semibold mb-0">{{ total_appointments }}</div>
+            </div>
+            <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">All</span>
+          </div>
+
+          <div class="mt-3">
+            <a href="{{ url_for('views.admin_appointments') }}" class="btn btn-outline-primary btn-sm">
+              View details
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming -->
+    <div class="col-12 col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="text-muted small">Upcoming Appointments</div>
+              <div class="display-6 fw-semibold mb-0">{{ upcoming_appointments }}</div>
+              <div class="text-muted small mt-1">Next 7 days</div>
+            </div>
+            <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">Upcoming</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slots -->
+    <div class="col-12 col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="text-muted small">Available Slots</div>
+              <div class="display-6 fw-semibold mb-0">{{ available_slots }}</div>
+              <div class="text-muted small mt-1">Today</div>
+            </div>
+            <span class="badge bg-warning-subtle text-warning px-3 py-2 rounded-pill">Slots</span>
+          </div>
+
+         
+          <div class="mt-3">
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar" role="progressbar" style="width: 70%;" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="text-muted small mt-2">Tip: Keep some slots for walk-ins.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Quick Actions + Next Steps -->
+  <div class="row g-3">
+    <div class="col-12 col-lg-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="mb-2">Quick Actions</h6>
+          <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-outline-dark btn-sm" href="{{ url_for('views.admin_appointments') }}">
+              Manage Appointments
+            </a>
+            <a class="btn btn-outline-dark btn-sm" href="{{ url_for('views.admin_availability') }}">
+              Add / Edit Slots
+            </a>
+            <a class="btn btn-outline-dark btn-sm" href="{{ url_for('auth.logout') }}">
+              Logout
+            </a>
+          </div>
+          <p class="text-muted small mt-3 mb-0">
+            Next: show Online vs Physical appointments in the appointments table using badges.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="mb-2">Dashboard Checklist</h6>
+          <ul class="text-muted small mb-0">
+            <li>Add “Online” vs “Physical” counts</li>
+            <li>Show latest 5 appointments preview</li>
+            <li>Filter appointments by type/status</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

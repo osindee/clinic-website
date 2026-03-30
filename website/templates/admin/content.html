@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Content{% endblock %}
+
+{% block navbar %}
+  {% if current_user.is_authenticated %}
+    {% include 'admin/navbar.html' %}
+  {% else %}
+    {% include 'public/navbar.html' %}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Edit Site Content</h2>
+
+    <!-- Editable Content Table -->
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>Value</th>
+                <th>Type</th>
+                <th>Active</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in content %}
+            <tr id="row-{{ item.id }}">
+                <td>{{ item.key }}</td>
+                <td>
+                    {% if item.content_type == 'toggle' %}
+                        <input type="checkbox" class="content-value-toggle" data-id="{{ item.id }}" {% if item.value == 'true' %}checked{% endif %}>
+                    {% else %}
+                        <input type="text" class="form-control content-value-text" data-id="{{ item.id }}" value="{{ item.value }}">
+                    {% endif %}
+                </td>
+                <td>{{ item.content_type }}</td>
+                <td>
+                    <input type="checkbox" class="content-active" data-id="{{ item.id }}" {% if item.is_active %}checked{% endif %}>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="{{ item.id }}">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <hr>
+
+    <!-- Add New Content -->
+    <h4>Add New Content</h4>
+    <form id="add-content-form">
+        <div class="row mb-2">
+            <div class="col">
+                <input type="text" class="form-control" name="key" placeholder="Key" required>
+            </div>
+            <div class="col">
+                <input type="text" class="form-control" name="value" placeholder="Value">
+            </div>
+            <div class="col">
+                <select class="form-select" name="content_type">
+                    <option value="text">Text</option>
+                    <option value="toggle">Toggle</option>
+                </select>
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-success">Add Content</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // ----- Update text value -----
+    document.querySelectorAll('.content-value-text').forEach(el => {
+        el.addEventListener('change', function() {
+            const id = this.dataset.id;
+            const value = this.value;
+            fetch(`/admin/content/update/${id}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({value: value})
+            }).then(res => res.json()).then(data => {
+                if(data.success) console.log(`Text content ${id} updated`);
+            });
+        });
+    });
+
+    // ----- Update toggle value -----
+    document.querySelectorAll('.content-value-toggle').forEach(el => {
+        el.addEventListener('change', function() {
+            const id = this.dataset.id;
+            const value = this.checked ? 'true' : 'false';
+            fetch(`/admin/content/update/${id}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({value: value})
+            }).then(res => res.json()).then(data => {
+                if(data.success) console.log(`Toggle content ${id} updated`);
+            });
+        });
+    });
+
+    // ----- Update active flag -----
+    document.querySelectorAll('.content-active').forEach(el => {
+        el.addEventListener('change', function() {
+            const id = this.dataset.id;
+            const is_active = this.checked;
+            fetch(`/admin/content/update/${id}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({is_active: is_active})
+            }).then(res => res.json()).then(data => {
+                if(data.success) console.log(`Active status ${id} updated`);
+            });
+        });
+    });
+
+    // ----- Delete content -----
+    document.querySelectorAll('.delete-btn').forEach(el => {
+        el.addEventListener('click', function() {
+            const id = this.dataset.id;
+            if(confirm('Are you sure you want to delete this content?')) {
+                fetch(`/admin/content/delete/${id}`, {method: 'POST'})
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) document.getElementById(`row-${id}`).remove();
+                });
+            }
+        });
+    });
+
+    // ----- Add new content -----
+    document.getElementById('add-content-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch('/admin/content/add', {
+            method: 'POST',
+            body: formData
+        }).then(res => res.json())
+        .then(data => {
+            if(data.success) location.reload();
+            else alert(data.message);
+        });
+    });
+
+});
+</script>
+{% endblock %}

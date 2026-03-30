@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Services{% endblock %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="services-hero text-center mb-5">
+      <h2 class="section-title mb-2">Services</h2>
+      <p class="text-muted mb-0">
+        Support tailored to your needs — online and in-person sessions available.
+      </p>
+    </div>
+
+    <!-- Services grid -->
+    <div class="row g-4">
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="service-card h-100">
+          <div class="service-icon mb-3"></div>
+          <h5 class="fw-bold mb-2">Individual Therapy</h5>
+          <p class="mb-3">Anxiety, stress, depression, and life transitions — a safe space to heal and grow.</p>
+          <ul class="text-muted small mb-0 ps-3">
+            <li>1:1 confidential sessions</li>
+            <li>Goal-based support</li>
+            <li>Online or physical</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="service-card h-100">
+          <div class="service-icon mb-3"></div>
+          <h5 class="fw-bold mb-2">Couples Therapy</h5>
+          <p class="mb-3">Improve communication, rebuild trust, and strengthen your relationship.</p>
+          <ul class="text-muted small mb-0 ps-3">
+            <li>Conflict resolution</li>
+            <li>Communication tools</li>
+            <li>Healthy boundaries</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="service-card h-100">
+          <div class="service-icon mb-3"></div>
+          <h5 class="fw-bold mb-2">Child & Adolescent Therapy</h5>
+          <p class="mb-3">Emotional regulation, school stress, behavior challenges, and self-esteem support.</p>
+          <ul class="text-muted small mb-0 ps-3">
+            <li>Age-appropriate approach</li>
+            <li>Parent guidance</li>
+            <li>Safe environment</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="service-card h-100">
+          <div class="service-icon mb-3"></div>
+          <h5 class="fw-bold mb-2">Family Therapy</h5>
+          <p class="mb-3">Strengthen relationships and improve understanding within the family.</p>
+          <ul class="text-muted small mb-0 ps-3">
+            <li>Healthy family dynamics</li>
+            <li>Better communication</li>
+            <li>Support during change</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="service-card h-100">
+          <div class="service-icon mb-3"></div>
+          <h5 class="fw-bold mb-2">Trauma Support</h5>
+          <p class="mb-3">Compassionate care for recovery and healing after difficult experiences.</p>
+          <ul class="text-muted small mb-0 ps-3">
+            <li>Safe paced sessions</li>
+            <li>Grounding techniques</li>
+            <li>Resilience building</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="service-card h-100">
+          <div class="service-icon mb-3"></div>
+          <h5 class="fw-bold mb-2">Career & Life Coaching</h5>
+          <p class="mb-3">Clarity, confidence, and direction — build habits and goals that stick.</p>
+          <ul class="text-muted small mb-0 ps-3">
+            <li>Goal setting</li>
+            <li>Decision support</li>
+            <li>Accountability</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="services-cta mt-5">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4 p-md-5 text-center">
+          <h4 class="fw-bold mb-2">Not sure which service fits you?</h4>
+          <p class="text-muted mb-4">Book an appointment and we’ll guide you to the right support.</p>
+          <a href="{{ url_for('views.booking') }}" class="btn btn-primary btn-lg px-4">Book Appointment</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

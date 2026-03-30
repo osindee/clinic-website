@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Appointment{% endblock %}
+
+{% block content %}
+
+<!-- Flash messages -->
+<div class="container pt-3">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+
+<!-- BOOKING FORM -->
+ <div>
+<section id="booking" class="container py-5" data-aos="fade-up">
+  <h2 class="section-title text-center mb-4" data-aos="fade-right">Book Appointment</h2>
+
+  {% if slots_by_date %}
+    <form id="bookingForm" class="mx-auto" style="max-width: 600px" method="POST"
+          data-aos="fade-left" action="{{ url_for('views.booking') }}">
+
+      <div class="mb-3">
+        <label class="form-label">Full Name</label>
+        <input type="text" name="fullname" id="fullname" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" id="email" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Preferred Date</label>
+        <!-- Date is restricted via JS to only allow admin-set available dates -->
+        <select name="date" id="date" class="form-control" required>
+          <option value="">-- Select a date --</option>
+          {% for date_str in slots_by_date.keys() %}
+            <option value="{{ date_str }}">{{ date_str }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Preferred Time</label>
+        <select name="time" id="time" class="form-control" required>
+          <option value="">-- Select a date first --</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Message / Concern</label>
+        <textarea name="message" id="message" class="form-control" rows="4"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Submit</button>
+    </form>
+
+  {% else %}
+    <!-- No slots available yet -->
+    <div class="text-center mx-auto" style="max-width: 600px;" data-aos="fade-left">
+      <div class="alert alert-info">
+        <h5 class="mb-1">No available slots at the moment</h5>
+        <p class="mb-0">Please check back later or contact us directly to schedule an appointment.</p>
+      </div>
+    </div>
+  {% endif %}
+</section>
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script id="slots-data" type="application/json">{{ slots_by_date | tojson | safe }}</script>
+
+<script>
+  const slotsByDate = JSON.parse(document.getElementById('slots-data').textContent || '{}');
+  const dateSelect = document.getElementById('date');
+  const timeSelect = document.getElementById('time');
+
+  function updateTimes() {
+    const selectedDate = dateSelect ? dateSelect.value : null;
+    if (!timeSelect) return;
+
+    timeSelect.innerHTML = '';
+
+    if (selectedDate && slotsByDate[selectedDate] && slotsByDate[selectedDate].length > 0) {
+      // Add a placeholder
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.text = '-- Select a time --';
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      timeSelect.appendChild(placeholder);
+
+      // Add available times
+      slotsByDate[selectedDate].forEach(t => {
+        const option = document.createElement('option');
+        option.value = t;
+        option.text = t;
+        timeSelect.appendChild(option);
+      });
+    } else {
+      const option = document.createElement('option');
+      option.value = '';
+      option.text = selectedDate ? 'No available times for this date' : '-- Select a date first --';
+      option.disabled = true;
+      option.selected = true;
+      timeSelect.appendChild(option);
+    }
+  }
+
+  // Run on page load
+  if (dateSelect) {
+    updateTimes();
+    dateSelect.addEventListener('change', updateTimes);
+  }
+</script>
+{% endblock %}
